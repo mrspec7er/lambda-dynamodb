@@ -1,0 +1,58 @@
+service: testing
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-southeast-2
+  iam:
+    role:
+      - Effect: Allow
+        Action: "dynamodb:PutItem"
+        Resource: "arn:aws:dynamodb:us-east-1:802477477038:table/TestingDB"
+
+functions:
+  addData:
+    handler: src/addFunction.addData
+    events:
+      - httpApi:
+          path: /
+          method: post
+  getData:
+    handler: src/getFunction.getData
+    events:
+      - httpApi:
+          path: /
+          method: get
+  getOneData:
+    handler: src/getOneFunction.getOneData
+    events:
+      - httpApi:
+          path: /{id}
+          method: get
+  updateData:
+    handler: src/updateFunction.updateData
+    events:
+      - httpApi:
+          path: /{id}
+          method: put
+  deleteData:
+    handler: src/deleteFunction.deleteData
+    events:
+      - httpApi:
+          path: /{id}
+          method: delete
+
+resources:
+  Resources:
+    TestingDB:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TestingDB
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
